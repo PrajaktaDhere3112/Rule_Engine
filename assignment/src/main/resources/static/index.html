@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rule Engine</title>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 20px;
+	background-color: #f4f4f4;
+}
+
+.container {
+	max-width: 600px;
+	margin: auto;
+	background: #fff;
+	padding: 20px;
+	border-radius: 5px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+	
+	text-align: center;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+}
+
+input[type="text"] {
+	margin: 10px 0;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+button {
+	padding: 10px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+button:hover {
+	background-color: #0056b3;
+}
+
+ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+li {
+	padding: 10px;
+	border-bottom: 1px solid #ccc;
+}
+</style>
+<script>
+        async function createRule() {
+            const ruleString = document.getElementById("ruleInput").value;
+            const response = await fetch('/api/rules/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ruleString })
+            });
+            const result = await response.json();
+            document.getElementById("ruleOutput").innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function combineRules() {
+            const rule1 = document.getElementById("rule1").value;
+            const rule2 = document.getElementById("rule2").value;
+            const response = await fetch('/api/rules/combine', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rules: [rule1, rule2] })
+            });
+            const result = await response.json();
+            document.getElementById("combineOutput").innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function evaluateRule() {
+            const rulesInput = document.getElementById("rulesInput").value;
+            const dataInput = document.getElementById("dataInput").value;
+
+            let rules, data;
+            try {
+                // Parse the rules and data inputs from the textarea
+                rules = JSON.parse(rulesInput);
+                data = JSON.parse(dataInput);
+            } catch (error) {
+                alert("Invalid JSON format. Please ensure your input is valid JSON.");
+                return;
+            }
+
+            // Prepare request body for evaluation
+            const requestBody = {
+                rules: rules.rules,
+                data: data.data
+            };
+
+            const response = await fetch('/api/rules/evaluate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            // Read response once and check for content type
+            const contentType = response.headers.get("content-type");
+            let result;
+
+            if (contentType && contentType.includes("application/json")) {
+                result = await response.json();
+                // Check if the response contains an 'eligible' property
+                document.getElementById("evaluateOutput").innerText = result.eligible ? "Eligible" : "Not Eligible";
+            } else {
+                const textResult = await response.text();
+                document.getElementById("evaluateOutput").innerText = textResult; // Display plain response
+            }
+        }
+    </script>
+</head>
+<body>
+
+	
+	<h1>Rule Engine</h1>
+
+	<h2>Create Rule</h2>
+	<input type="text" id="ruleInput"
+		placeholder="Enter rule here (e.g., age > 30 AND department = 'Sales')" />
+	<button onclick="createRule()">Create Rule</button>
+	<pre id="ruleOutput"></pre>
+
+	<h2>Combine Rules</h2>
+	<input type="text" id="rule1" placeholder="Enter first rule" />
+	<input type="text" id="rule2" placeholder="Enter second rule" />
+	<button onclick="combineRules()">Combine Rules</button>
+	<pre id="combineOutput"></pre>
+
+	<h2>Evaluate Rule</h2>
+	<textarea id="rulesInput"
+		placeholder='Enter rules as JSON (e.g., {"rules": ["age > 30", "department = \'
+		Sales\'"]})' rows="4" cols="50">
+
+    </textarea>
+	<br>
+	<textarea id="dataInput"
+		placeholder='Enter data as JSON (e.g., {"data": {"age": 35, "department": "Sales", "salary": 60000, "experience": 3}})'
+		rows="6" cols="50">
+
+    </textarea>
+	<button onclick="evaluateRule()">Evaluate Rule</button>
+	<pre id="evaluateOutput"></pre>
+
+</body>
+</html>
