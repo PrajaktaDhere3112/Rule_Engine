@@ -36,7 +36,7 @@ The following dependencies are included in the `pom.xml` file:
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/PrajaktaDhere3112/Rule_Engine
    cd assignment
 
 
