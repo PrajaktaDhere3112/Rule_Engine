@@ -1,5 +1,5 @@
-# Zeotap-Rule_Engine
-# Assignment
+# Rule_Engine
+
 
 ## Description
 This is a demo project for Spring Boot, designed to showcase a basic web application using Spring Data JPA, Thymeleaf, and MySQL. The project demonstrates how to create a simple web application structure with a focus on best practices in Spring Boot development.
